@@ -22,7 +22,7 @@ var Key []byte
 // New returns the jwfilter-handler
 func New(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		claimMap := make(map[string]*jwt.MapClaims)
+		claimMap := make(map[string]map[string]interface{})
 		for _, cookieName := range CookieNames {
 			cookie, err := r.Cookie(cookieName)
 			if err != nil {
@@ -35,7 +35,11 @@ func New(next http.Handler) http.Handler {
 				http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 				return
 			}
-			claimMap[cookieName] = claims
+
+			claimMap[cookieName] = make(map[string]interface{})
+			for k, v := range *claims {
+				claimMap[cookieName][k] = v
+			}
 		}
 		ctx := context.WithValue(r.Context(), CtxKeyJWT, &claimMap)
 		next.ServeHTTP(w, r.WithContext(ctx))

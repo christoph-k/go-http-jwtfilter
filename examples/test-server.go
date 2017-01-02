@@ -14,12 +14,15 @@ func dump(w http.ResponseWriter, r *http.Request) {
 	if ctx == nil {
 		return
 	}
-	tokens := *ctx.Value(jwtfilter.CtxKeyJWT).(*map[string]*jwt.MapClaims)
+	tokens := ctx.Value(jwtfilter.CtxKeyJWT).(*map[string]map[string]interface{})
 	if tokens == nil {
 		return
 	}
-	for i, t := range tokens {
-		w.Write([]byte(fmt.Sprintf("%v\n%#v\n\n", i, t)))
+	for i, t := range *tokens {
+		w.Write([]byte(fmt.Sprintf("%v\n", i)))
+		for k, v := range t {
+			w.Write([]byte(fmt.Sprintf("%v => %v\n", k, v)))
+		}
 	}
 }
 
